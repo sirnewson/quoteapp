@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quote It. - Design Randomizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Lexend+Deca:wght@400;700&family=Playfair+Display:wght@700&family=Poppins:wght@400;700&family=Caveat:wght@700&family=Roboto+Mono:wght@400;700&family=Dancing+Script:wght@700&family=Patrick+Hand&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #F26419;
+            --primary-hover: #F58A4B;
+            --dark-bg: #0C1A1E;
+            --medium-bg: #1A2C32;
+            --light-bg: #2E474F;
+            --text-light: #E0F2F1;
+            --text-medium: #80CBC4;
+            --border-color: #26A69A;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+        }
+        .gradient-text {
+            background: linear-gradient(to right, var(--primary-color), var(--primary-hover));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        input, textarea {
+            background-color: var(--medium-bg);
+            border-color: var(--light-bg);
+            color: var(--text-light);
+        }
+        input:focus, textarea:focus {
+            --tw-ring-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .active-btn {
+            background-color: var(--primary-color) !important;
+            color: #ffffff !important;
+        }
+        .ratio-btn, .vibe-btn {
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .result-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.75rem;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-card canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .result-card .overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .result-card:hover .overlay {
+            opacity: 1;
+        }
+        .export-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 999px;
+            color: white;
+            font-weight: bold;
+            transform: scale(0.9);
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+        .result-card:hover .export-btn {
+            transform: scale(1);
+        }
+        .export-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8">
+
+    <div class="w-full max-w-screen-xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Left Column: Controls -->
+        <div class="lg:col-span-1 space-y-6 lg:sticky top-8 self-start">
+            <header class="text-center lg:text-left">
+                <h1 class="text-4xl font-bold gradient-text" style="font-family: 'Lexend Deca', sans-serif;">Quote It.</h1>
+                <p class="text-gray-400 mt-2">
+                    Instantly generate six unique designs from your text.
+                </p>
+            </header>
+
+            <div class="space-y-4">
+                <label class="block text-sm font-medium text-gray-300">Your Quote</label>
+                <textarea id="promptInput" rows="4" class="w-full border-2 rounded-xl p-4 text-base focus:ring-2 focus:outline-none transition" placeholder="“The journey of a thousand miles begins with a single step.”"></textarea>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Header</label>
+                    <input type="text" id="headerInput" value="INSPIRATION" class="w-full border-2 rounded-xl p-3 text-sm focus:ring-2 focus:outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Footer / Handle</label>
+                    <input type="text" id="footerInput" value="@yourhandle" class="w-full border-2 rounded-xl p-3 text-sm focus:ring-2 focus:outline-none transition">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Post Format</label>
+                <div id="aspectRatioContainer" class="grid grid-cols-5 gap-2 bg-[var(--medium-bg)] p-2 rounded-xl">
+                    <button class="ratio-btn flex flex-col items-center p-2 rounded-md text-xs" data-ratio="4:5"><span>4:5</span><span class="text-gray-400">IG Post</span></button>
+                    <button class="ratio-btn flex flex-col items-center p-2 rounded-md text-xs" data-ratio="1:1"><span>1:1</span><span class="text-gray-400">X/Threads</span></button>
+                    <button class="ratio-btn flex flex-col items-center p-2 rounded-md text-xs" data-ratio="9:16"><span>9:16</span><span class="text-gray-400">Story</span></button>
+                    <button class="ratio-btn flex flex-col items-center p-2 rounded-md text-xs" data-ratio="16:9"><span>16:9</span><span class="text-gray-400">Landscape</span></button>
+                    <button class="ratio-btn flex flex-col items-center p-2 rounded-md text-xs" data-ratio="1.91:1"><span>1.91:1</span><span class="text-gray-400">Facebook</span></button>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Vibe</label>
+                <div id="vibeContainer" class="grid grid-cols-4 gap-2 bg-[var(--medium-bg)] p-2 rounded-xl">
+                    <button class="vibe-btn p-2 rounded-md text-sm" data-vibe="Calm">Calm</button>
+                    <button class="vibe-btn p-2 rounded-md text-sm" data-vibe="Artistic">Artistic</button>
+                    <button class="vibe-btn p-2 rounded-md text-sm" data-vibe="Minimal">Minimal</button>
+                    <button class="vibe-btn p-2 rounded-md text-sm" data-vibe="Abstract">Abstract</button>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 pt-4">
+                <button id="generateBtn" class="w-full flex items-center justify-center gap-2 bg-[var(--primary-color)] hover:bg-[var(--primary-hover)] text-white font-bold py-3 px-5 rounded-lg transition-all shadow-lg hover:shadow-xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0a1 1 0 0 1 1 1v5.268l4.562-2.634a1 1 0 1 1 1 1.732L10 8l4.562 2.634a1 1 0 1 1-1 1.732L9 9.732V15a1 1 0 1 1-2 0V9.732l-4.562 2.634a1 1 0 1 1-1-1.732L6 8 1.438 5.366a1 1 0 0 1 1-1.732L7 6.268V1a1 1 0 0 1 1-1z"/></svg>
+                    Generate
+                </button>
+                <button id="randomizeBtn" class="w-full flex items-center justify-center gap-2 bg-[var(--light-bg)] hover:bg-gray-600 text-white font-bold py-3 px-5 rounded-lg transition hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg>
+                    Randomize
+                </button>
+            </div>
+            
+        </div>
+
+        <!-- Right Column: Results -->
+        <div class="lg:col-span-2">
+            <div id="resultsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <!-- Canvases will be generated here -->
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="text-center mt-12 text-gray-400 text-sm">
+        <p>Simple. Fast. Creative. | Created By Sir Newson</p>
+    </footer>
+
+    <script>
+        // --- DOM Elements ---
+        const promptInput = document.getElementById('promptInput');
+        const headerInput = document.getElementById('headerInput');
+        const footerInput = document.getElementById('footerInput');
+        const generateBtn = document.getElementById('generateBtn');
+        const randomizeBtn = document.getElementById('randomizeBtn');
+        const resultsGrid = document.getElementById('resultsGrid');
+        const aspectRatioContainer = document.getElementById('aspectRatioContainer');
+        const vibeContainer = document.getElementById('vibeContainer');
+
+        // --- State ---
+        let appState = {
+            customBgDataURL: null,
+            selectedRatio: '4:5',
+            selectedVibe: 'Artistic'
+        };
+        
+        const aspectRatios = {
+            '4:5': { width: 1080, height: 1350 },
+            '1:1': { width: 1080, height: 1080 },
+            '9:16': { width: 1080, height: 1920 },
+            '16:9': { width: 1920, height: 1080 },
+            '1.91:1': { width: 1200, height: 628 }
+        };
+
+        // --- Design Assets ---
+        const VIBES = {
+            Calm: {
+                fonts: ["'Inter', sans-serif", "'Poppins', sans-serif", "'Lexend Deca', sans-serif"],
+                backgrounds: ['linear-gradient(135deg, #2E474F, #80CBC4)', 'linear-gradient(135deg, #1A2C32, #26A69A)', 'linear-gradient(135deg, #3B82F6, #A5B4FC)', '#1A2C32']
+            },
+            Artistic: {
+                fonts: ["'Caveat', cursive", "'Dancing Script', cursive", "'Patrick Hand', cursive", "'Playfair Display', serif"],
+                backgrounds: ['linear-gradient(135deg, #F26419, #F58A4B)', 'linear-gradient(135deg, #8B5CF6, #EC4899)', 'linear-gradient(135deg, #FBBF24, #EF4444)']
+            },
+            Minimal: {
+                fonts: ["'Inter', sans-serif", "'Roboto Mono', monospace", "'Poppins', sans-serif"],
+                backgrounds: ['#0C1A1E', '#111827', '#212121', '#E0F2F1']
+            },
+            Abstract: {
+                fonts: ["'Lexend Deca', sans-serif", "'Playfair Display', serif", "'Roboto Mono', monospace"],
+                backgrounds: ['linear-gradient(160deg, #00003f, #7a004f, #ff8c00)', 'linear-gradient(135deg, #004d40, #00838f, #4dd0e1)', 'linear-gradient(135deg, #6D28D9, #4C1D95)']
+            }
+        };
+
+        // --- Event Listeners ---
+        window.onload = () => {
+            updateActiveRatioUI();
+            updateActiveVibeUI();
+        };
+
+        generateBtn.addEventListener('click', () => {
+            if (!promptInput.value.trim()) promptInput.value = "“Don't forget to write something here!”";
+            randomizeBtn.classList.remove('hidden');
+            renderAllCanvases();
+        });
+
+        randomizeBtn.addEventListener('click', renderAllCanvases);
+
+        aspectRatioContainer.addEventListener('click', (e) => {
+            const btn = e.target.closest('.ratio-btn');
+            if (btn?.dataset.ratio) {
+                appState.selectedRatio = btn.dataset.ratio;
+                updateActiveRatioUI();
+                if (!randomizeBtn.classList.contains('hidden')) renderAllCanvases();
+            }
+        });
+
+        vibeContainer.addEventListener('click', (e) => {
+            const btn = e.target.closest('.vibe-btn');
+            if (btn?.dataset.vibe) {
+                appState.selectedVibe = btn.dataset.vibe;
+                updateActiveVibeUI();
+                if (!randomizeBtn.classList.contains('hidden')) renderAllCanvases();
+            }
+        });
+        
+        // --- Core Functions ---
+        function updateActiveRatioUI() {
+            document.querySelectorAll('.ratio-btn').forEach(b => b.classList.toggle('active-btn', b.dataset.ratio === appState.selectedRatio));
+        }
+        
+        function updateActiveVibeUI() {
+            document.querySelectorAll('.vibe-btn').forEach(b => b.classList.toggle('active-btn', b.dataset.vibe === appState.selectedVibe));
+        }
+
+        function renderAllCanvases() {
+            resultsGrid.innerHTML = '';
+            const usedFonts = new Set();
+            const usedBgs = new Set();
+            const dims = aspectRatios[appState.selectedRatio];
+            const currentVibe = VIBES[appState.selectedVibe];
+
+            for (let i = 0; i < 6; i++) {
+                let font = getRandomItem(currentVibe.fonts, usedFonts);
+                usedFonts.add(font);
+
+                let bg = appState.customBgDataURL ? appState.customBgDataURL : getRandomItem(currentVibe.backgrounds, usedBgs);
+                if (!appState.customBgDataURL) usedBgs.add(bg);
+
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                card.style.aspectRatio = `${dims.width} / ${dims.height}`;
+                
+                const canvas = document.createElement('canvas');
+                card.appendChild(canvas);
+
+                const overlay = document.createElement('div');
+                overlay.className = 'overlay';
+                
+                const exportBtn = document.createElement('button');
+                exportBtn.className = 'export-btn';
+                exportBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg> Export`;
+                exportBtn.onclick = () => {
+                    const link = document.createElement('a');
+                    link.download = `quote-it-design-${i+1}.png`;
+                    link.href = canvas.toDataURL('image/png', 1.0);
+                    link.click();
+                };
+                overlay.appendChild(exportBtn);
+                card.appendChild(overlay);
+
+                resultsGrid.appendChild(card);
+                drawCanvas(canvas, {
+                    main: promptInput.value,
+                    header: headerInput.value || 'INSPIRATION',
+                    footer: footerInput.value || '@yourhandle'
+                }, font, bg, dims);
+            }
+        }
+
+        async function drawCanvas(canvas, text, fontFamily, backgroundStyle, dims) {
+            const ctx = canvas.getContext('2d');
+            canvas.width = dims.width;
+            canvas.height = dims.height;
+            ctx.imageSmoothingQuality = 'high';
+
+            await drawBackground(ctx, canvas, backgroundStyle);
+
+            const padding = canvas.width * 0.1;
+            const maxWidth = canvas.width - padding * 2;
+            
+            const textColor = (appState.selectedVibe === 'Minimal' && backgroundStyle === '#E0F2F1') ? '#0C1A1E' : '#E0F2F1';
+            ctx.fillStyle = textColor;
+            
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            await document.fonts.load(`bold 1px ${fontFamily}`);
+
+            const headerSize = canvas.width * 0.025;
+            ctx.font = `700 ${headerSize}px ${fontFamily}`;
+            ctx.globalAlpha = 0.7;
+            const d = new Date();
+            const dateStr = `${d.getMonth() + 1}/${d.getDate()}/${String(d.getFullYear()).slice(-2)}`;
+            const headerWithDate = `${text.header.toUpperCase()} • ${dateStr}`;
+            ctx.fillText(headerWithDate, canvas.width / 2, padding);
+
+            const mainSize = canvas.width * 0.06;
+            ctx.font = `bold ${mainSize}px ${fontFamily}`;
+            ctx.globalAlpha = 1.0;
+            const mainLines = wrapText(text.main, maxWidth, ctx);
+            const mainLineHeight = mainSize * 1.2;
+            const totalMainHeight = mainLines.length * mainLineHeight;
+            let currentY = (canvas.height / 2) - (totalMainHeight / 2) + (mainLineHeight / 2);
+            mainLines.forEach(line => {
+                ctx.fillText(line, canvas.width / 2, currentY);
+                currentY += mainLineHeight;
+            });
+            
+            const footerSize = canvas.width * 0.03;
+            ctx.font = `700 ${footerSize}px ${fontFamily}`;
+            ctx.fillText(text.footer.toUpperCase(), canvas.width / 2, canvas.height - padding);
+        }
+
+        async function drawBackground(ctx, canvas, style) {
+            if (style.startsWith('data:image')) {
+                return new Promise(resolve => {
+                    const img = new Image();
+                    img.onload = () => {
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        resolve();
+                    };
+                    img.onerror = () => {
+                        ctx.fillStyle = '#0C1A1E';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        resolve();
+                    }
+                    img.src = style;
+                });
+            } else {
+                if (style.startsWith('linear-gradient')) {
+                    const colors = style.match(/#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})/g);
+                    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                    if (colors.length > 2) {
+                        gradient.addColorStop(0, colors[0]);
+                        gradient.addColorStop(0.5, colors[1]);
+                        gradient.addColorStop(1, colors[2]);
+                    } else {
+                        gradient.addColorStop(0.1, colors[0]);
+                        gradient.addColorStop(0.9, colors[1]);
+                    }
+                    ctx.fillStyle = gradient;
+                } else {
+                    ctx.fillStyle = style;
+                }
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                return Promise.resolve();
+            }
+        }
+
+        function wrapText(text, maxWidth, context) {
+            const words = text.split(' ');
+            const lines = [];
+            let currentLine = words[0] || '';
+            for (let i = 1; i < words.length; i++) {
+                const testLine = currentLine + ' ' + words[i];
+                if (context.measureText(testLine).width > maxWidth) {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                } else {
+                    currentLine = testLine;
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+
+        function getRandomItem(arr, excludeSet = new Set()) {
+            let item;
+            const availableItems = arr.filter(x => !excludeSet.has(x));
+            if (availableItems.length > 0) {
+                item = availableItems[Math.floor(Math.random() * availableItems.length)];
+            } else {
+                item = arr[Math.floor(Math.random() * arr.length)];
+            }
+            return item;
+        }
+
+    </script>
+</body>
+</html>
