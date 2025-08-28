@@ -249,7 +249,7 @@
     </div>
 
     <footer class="text-center mt-12 text-gray-400 text-sm">
-        <p>Simple. Fast. Creative. | Created By Sir Newson</p>
+        <p>Simple. Fast. Creative. | Created By BIOS Studios </p>
     </footer>
 
     <script>
@@ -439,8 +439,23 @@
             } else {
                 charCountSpan.classList.remove('text-red-500');
             }
+            if (!randomizeBtn.classList.contains('hidden')) {
+                renderAllCanvases();
+            }
         });
         
+        headerInput.addEventListener('input', () => {
+            if (!randomizeBtn.classList.contains('hidden')) {
+                renderAllCanvases();
+            }
+        });
+
+        footerInput.addEventListener('input', () => {
+            if (!randomizeBtn.classList.contains('hidden')) {
+                renderAllCanvases();
+            }
+        });
+
         // --- Core Functions ---
         function updateActiveRatioUI() {
             document.querySelectorAll('.ratio-btn').forEach(b => {
