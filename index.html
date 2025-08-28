@@ -249,7 +249,7 @@
     </div>
 
     <footer class="text-center mt-12 text-gray-400 text-sm">
-        <p>Simple. Fast. Creative. | Created By BIOS Studios </p>
+        <p>Simple. Fast. Creative. | Created By Sir Newson</p>
     </footer>
 
     <script>
@@ -601,35 +601,41 @@
                 const exportBtn = document.createElement('button');
                 exportBtn.className = 'export-btn';
                 exportBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg> Export`;
-                exportBtn.onclick = () => {
+                
+                const currentText = {
+                    main: promptInput.value,
+                    header: headerInput.value || 'Quote It.',
+                    footer: footerInput.value || '@yourhandle'
+                };
+                const currentBackground = (bgDataURL && !appState.selectedVibe) ? bgDataURL : (vibeBackgrounds ? vibeBackgrounds[i % vibeBackgrounds.length] : null);
+                const currentFont = VIBES[appState.selectedVibe]?.fonts[i % VIBES[appState.selectedVibe]?.fonts.length];
+
+                exportBtn.onclick = async () => {
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = dims.width;
+                    tempCanvas.height = dims.height;
+
+                    if (isTwitterMode) {
+                        await drawTwitterCanvas(tempCanvas, currentText, currentBackground, appState.customProfileDataURL);
+                    } else {
+                        await drawDefaultCanvas(tempCanvas, currentText, currentFont, currentBackground, dims);
+                    }
+
                     const link = document.createElement('a');
                     link.download = `quote-it-design-${i+1}.png`;
-                    link.href = canvas.toDataURL('image/png', 1.0);
+                    link.href = tempCanvas.toDataURL('image/png', 1.0);
                     link.click();
                 };
+
                 overlay.appendChild(exportBtn);
                 card.appendChild(overlay);
-
                 resultsGrid.appendChild(card);
-
-                const backgroundStyle = (bgDataURL && !appState.selectedVibe) ? bgDataURL : (vibeBackgrounds ? getRandomItem(vibeBackgrounds) : null);
                 
+                // Initial draw
                 if (isTwitterMode) {
-                    drawTwitterCanvas(canvas, {
-                        main: promptInput.value,
-                        header: headerInput.value || 'Quote It.',
-                        footer: footerInput.value || '@yourhandle'
-                    }, backgroundStyle, appState.customProfileDataURL);
+                    drawTwitterCanvas(canvas, currentText, currentBackground, appState.customProfileDataURL);
                 } else {
-                    const usedFonts = new Set();
-                    const currentVibe = VIBES[appState.selectedVibe];
-                    let font = getRandomItem(currentVibe.fonts, usedFonts);
-                    usedFonts.add(font);
-                    drawDefaultCanvas(canvas, {
-                        main: promptInput.value,
-                        header: headerInput.value || 'INSPIRATION',
-                        footer: footerInput.value || '@yourhandle'
-                    }, font, backgroundStyle, dims);
+                    drawDefaultCanvas(canvas, currentText, currentFont, currentBackground, dims);
                 }
             }
         }
@@ -651,7 +657,9 @@
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
-            await document.fonts.load(`bold 1px ${fontFamily}`);
+            if (fontFamily) {
+                await document.fonts.load(`bold 1px ${fontFamily}`);
+            }
 
             const headerSize = canvas.width * 0.025;
             ctx.font = `700 ${headerSize}px ${fontFamily}`;
@@ -716,6 +724,7 @@
             // Draw the avatar
             const avatarUrl = profileDataUrl || 'https://placehold.co/100x100/A5B4FC/4338CA?text=AV';
             const avatarImg = new Image();
+            avatarImg.crossOrigin = "Anonymous";
             avatarImg.src = avatarUrl;
             await new Promise(resolve => avatarImg.onload = resolve);
             
@@ -776,6 +785,7 @@
             if (style && (style.startsWith('data:image') || style.startsWith('http'))) {
                 return new Promise(resolve => {
                     const img = new Image();
+                    img.crossOrigin = "Anonymous";
                     img.onload = () => {
                         const imgRatio = img.width / img.height;
                         const canvasRatio = canvas.width / canvas.height;
