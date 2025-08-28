@@ -42,7 +42,7 @@
             background-color: var(--primary-color) !important;
             color: #ffffff !important;
         }
-        .ratio-btn, .vibe-btn {
+        .ratio-btn, .vibe-btn, .mode-btn, .mood-btn {
             transition: background-color 0.2s, color 0.2s;
         }
         .result-card {
@@ -93,6 +93,21 @@
         .export-btn:hover {
             background: rgba(255,255,255,0.2);
         }
+        .file-upload-label {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            background-color: var(--medium-bg);
+            transition: background-color 0.2s;
+        }
+        .file-upload-label:hover {
+            background-color: var(--light-bg);
+        }
     </style>
 </head>
 <body class="p-4 sm:p-6 lg:p-8">
@@ -107,22 +122,47 @@
                     Instantly generate six unique designs from your text.
                 </p>
             </header>
-
-            <div class="space-y-4">
-                <label class="block text-sm font-medium text-gray-300">Your Quote</label>
-                <textarea id="promptInput" rows="4" class="w-full border-2 rounded-xl p-4 text-base focus:ring-2 focus:outline-none transition" placeholder="“The journey of a thousand miles begins with a single step.”"></textarea>
-            </div>
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Header</label>
-                    <input type="text" id="headerInput" value="INSPIRATION" class="w-full border-2 rounded-xl p-3 text-sm focus:ring-2 focus:outline-none transition">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Footer / Handle</label>
-                    <input type="text" id="footerInput" value="@yourhandle" class="w-full border-2 rounded-xl p-3 text-sm focus:ring-2 focus:outline-none transition">
+            <!-- Design Mode Selector -->
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Design Mode</label>
+                <div id="designModeContainer" class="grid grid-cols-3 gap-2 bg-[var(--medium-bg)] p-2 rounded-xl">
+                    <button class="mode-btn p-2 rounded-md text-sm active-btn" data-mode="default">Default</button>
+                    <button class="mode-btn p-2 rounded-md text-sm" data-mode="twitter">Twitter Style</button>
+                    <button class="mode-btn p-2 rounded-md text-sm" data-mode="ai">AI Style</button>
                 </div>
             </div>
+
+            <div id="defaultAndTwitterControls">
+                <div class="space-y-4">
+                    <label class="block text-sm font-medium text-gray-300">Your Quote <span id="charCount" class="text-xs text-gray-400">0 / 160</span></label>
+                    <textarea id="promptInput" rows="4" class="w-full border-2 rounded-xl p-4 text-base focus:ring-2 focus:outline-none transition" placeholder="“The journey of a thousand miles begins with a single step.”"></textarea>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Header / Name</label>
+                        <input type="text" id="headerInput" value="INSPIRATION" class="w-full border-2 rounded-xl p-3 text-sm focus:ring-2 focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Footer / Handle</label>
+                        <input type="text" id="footerInput" value="@yourhandle" class="w-full border-2 rounded-xl p-3 text-sm focus:ring-2 focus:outline-none transition">
+                    </div>
+                </div>
+            </div>
+
+            <div id="aiControls" class="space-y-4 hidden">
+                <label class="block text-sm font-medium text-gray-300">Your Thoughts / Ideas</label>
+                <textarea id="aiPromptInput" rows="4" class="w-full border-2 rounded-xl p-4 text-base focus:ring-2 focus:outline-none transition" placeholder="Example: I'm feeling stressed and need to relax. Maybe a quote about finding peace?"></textarea>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Mood</label>
+                <div id="moodContainer" class="grid grid-cols-4 gap-2 bg-[var(--medium-bg)] p-2 rounded-xl">
+                    <button class="mood-btn p-2 rounded-md text-sm" data-mood="Happy">Happy</button>
+                    <button class="mood-btn p-2 rounded-md text-sm" data-mood="Formal">Formal</button>
+                    <button class="mood-btn p-2 rounded-md text-sm" data-mood="Fun">Fun</button>
+                    <button class="mood-btn p-2 rounded-md text-sm" data-mood="Humour">Humour</button>
+                </div>
+            </div>
+
 
             <div>
                 <label class="block text-sm font-medium text-gray-300 mb-2">Post Format</label>
@@ -135,13 +175,54 @@
                 </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">Vibe</label>
-                <div id="vibeContainer" class="grid grid-cols-4 gap-2 bg-[var(--medium-bg)] p-2 rounded-xl">
-                    <button class="vibe-btn p-2 rounded-md text-sm" data-vibe="Calm">Calm</button>
-                    <button class="vibe-btn p-2 rounded-md text-sm" data-vibe="Artistic">Artistic</button>
-                    <button class="vibe-btn p-2 rounded-md text-sm" data-vibe="Minimal">Minimal</button>
-                    <button class="vibe-btn p-2 rounded-md text-sm" data-vibe="Abstract">Abstract</button>
+            <div id="defaultControls" class="space-y-4">
+                <div class="flex flex-col gap-2">
+                    <label class="block text-sm font-medium text-gray-300">Background</label>
+                    <input type="file" id="defaultBgFileInput" accept="image/*" class="hidden">
+                    <label for="defaultBgFileInput" class="file-upload-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V10a.5.5 0 0 1-1 0V2.707L4.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/></svg>
+                        Upload Background Image
+                    </label>
+                    <p id="defaultBgFilename" class="text-xs text-gray-500"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Vibe</label>
+                    <div id="vibeContainerDefault" class="grid grid-cols-4 gap-2 bg-[var(--medium-bg)] p-2 rounded-xl">
+                        <button class="vibe-btn p-2 rounded-md text-sm" data-vibe="Calm">Calm</button>
+                        <button class="vibe-btn p-2 rounded-md text-sm" data-vibe="Artistic">Artistic</button>
+                        <button class="vibe-btn p-2 rounded-md text-sm" data-vibe="Minimal">Minimal</button>
+                        <button class="vibe-btn p-2 rounded-md text-sm" data-vibe="Abstract">Abstract</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="twitterControls" class="space-y-4 hidden">
+                <div class="flex flex-col gap-2">
+                    <label class="block text-sm font-medium text-gray-300">Background</label>
+                    <input type="file" id="twitterBgFileInput" accept="image/*" class="hidden">
+                    <label for="twitterBgFileInput" class="file-upload-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V10a.5.5 0 0 1-1 0V2.707L4.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/></svg>
+                        Upload Background Image
+                    </label>
+                    <p id="twitterBgFilename" class="text-xs text-gray-500"></p>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="block text-sm font-medium text-gray-300">Profile Picture</label>
+                    <input type="file" id="profileFileInput" accept="image/*" class="hidden">
+                    <label for="profileFileInput" class="file-upload-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/></svg>
+                        Upload Profile Picture
+                    </label>
+                    <p id="profileFilename" class="text-xs text-gray-500"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Vibe</label>
+                    <div id="vibeContainerTwitter" class="grid grid-cols-4 gap-2 bg-[var(--medium-bg)] p-2 rounded-xl">
+                        <button class="vibe-btn p-2 rounded-md text-sm" data-vibe="Calm">Calm</button>
+                        <button class="vibe-btn p-2 rounded-md text-sm" data-vibe="Artistic">Artistic</button>
+                        <button class="vibe-btn p-2 rounded-md text-sm" data-vibe="Minimal">Minimal</button>
+                        <button class="vibe-btn p-2 rounded-md text-sm" data-vibe="Abstract">Abstract</button>
+                    </div>
                 </div>
             </div>
 
@@ -180,13 +261,33 @@
         const randomizeBtn = document.getElementById('randomizeBtn');
         const resultsGrid = document.getElementById('resultsGrid');
         const aspectRatioContainer = document.getElementById('aspectRatioContainer');
-        const vibeContainer = document.getElementById('vibeContainer');
+        const designModeContainer = document.getElementById('designModeContainer');
+        const defaultAndTwitterControls = document.getElementById('defaultAndTwitterControls');
+        const defaultControls = document.getElementById('defaultControls');
+        const twitterControls = document.getElementById('twitterControls');
+        const aiControls = document.getElementById('aiControls');
+        const defaultBgFileInput = document.getElementById('defaultBgFileInput');
+        const defaultBgFilename = document.getElementById('defaultBgFilename');
+        const twitterBgFileInput = document.getElementById('twitterBgFileInput');
+        const twitterBgFilename = document.getElementById('twitterBgFilename');
+        const profileFileInput = document.getElementById('profileFileInput');
+        const profileFilename = document.getElementById('profileFilename');
+        const charCountSpan = document.getElementById('charCount');
+        const vibeContainerDefault = document.getElementById('vibeContainerDefault');
+        const vibeContainerTwitter = document.getElementById('vibeContainerTwitter');
+        const aiPromptInput = document.getElementById('aiPromptInput');
+        const moodContainer = document.getElementById('moodContainer');
+
 
         // --- State ---
         let appState = {
-            customBgDataURL: null,
+            defaultBgDataURL: null,
+            twitterBgDataURL: null,
+            customProfileDataURL: null,
             selectedRatio: '4:5',
-            selectedVibe: 'Artistic'
+            selectedVibe: 'Artistic',
+            selectedMood: 'Happy',
+            mode: 'default' // 'default', 'twitter', 'ai'
         };
         
         const aspectRatios = {
@@ -221,12 +322,18 @@
         window.onload = () => {
             updateActiveRatioUI();
             updateActiveVibeUI();
+            updateActiveMoodUI();
+            updateDesignModeUI();
         };
 
-        generateBtn.addEventListener('click', () => {
-            if (!promptInput.value.trim()) promptInput.value = "“Don't forget to write something here!”";
-            randomizeBtn.classList.remove('hidden');
-            renderAllCanvases();
+        generateBtn.addEventListener('click', async () => {
+            if (appState.mode === 'ai') {
+                await generateAIQuote();
+            } else {
+                if (!promptInput.value.trim()) promptInput.value = "“Don't forget to write something here!”";
+                randomizeBtn.classList.remove('hidden');
+                renderAllCanvases();
+            }
         });
 
         randomizeBtn.addEventListener('click', renderAllCanvases);
@@ -240,38 +347,232 @@
             }
         });
 
-        vibeContainer.addEventListener('click', (e) => {
+        vibeContainerDefault.addEventListener('click', (e) => {
             const btn = e.target.closest('.vibe-btn');
             if (btn?.dataset.vibe) {
                 appState.selectedVibe = btn.dataset.vibe;
+                appState.defaultBgDataURL = null; // Clear custom background when a vibe is selected
+                defaultBgFilename.textContent = '';
                 updateActiveVibeUI();
                 if (!randomizeBtn.classList.contains('hidden')) renderAllCanvases();
             }
         });
         
+        vibeContainerTwitter.addEventListener('click', (e) => {
+            const btn = e.target.closest('.vibe-btn');
+            if (btn?.dataset.vibe) {
+                appState.selectedVibe = btn.dataset.vibe;
+                appState.twitterBgDataURL = null; // Clear custom background when a vibe is selected
+                twitterBgFilename.textContent = '';
+                updateActiveVibeUI();
+                if (!randomizeBtn.classList.contains('hidden')) renderAllCanvases();
+            }
+        });
+
+        moodContainer.addEventListener('click', (e) => {
+            const btn = e.target.closest('.mood-btn');
+            if (btn?.dataset.mood) {
+                appState.selectedMood = btn.dataset.mood;
+                updateActiveMoodUI();
+            }
+        });
+
+        designModeContainer.addEventListener('click', (e) => {
+            const btn = e.target.closest('.mode-btn');
+            if (btn?.dataset.mode) {
+                appState.mode = btn.dataset.mode;
+                updateDesignModeUI();
+                if (appState.mode !== 'ai' && !randomizeBtn.classList.contains('hidden')) {
+                    renderAllCanvases();
+                }
+            }
+        });
+
+        defaultBgFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    appState.defaultBgDataURL = event.target.result;
+                    appState.selectedVibe = null;
+                    defaultBgFilename.textContent = file.name;
+                    updateActiveVibeUI(); // Clear vibe button selection
+                    if (!randomizeBtn.classList.contains('hidden')) renderAllCanvases();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        twitterBgFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    appState.twitterBgDataURL = event.target.result;
+                    appState.selectedVibe = null;
+                    twitterBgFilename.textContent = file.name;
+                    updateActiveVibeUI(); // Clear vibe button selection
+                    if (!randomizeBtn.classList.contains('hidden')) renderAllCanvases();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        profileFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    appState.customProfileDataURL = event.target.result;
+                    profileFilename.textContent = file.name;
+                    if (!randomizeBtn.classList.contains('hidden')) renderAllCanvases();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        promptInput.addEventListener('input', () => {
+            const charCount = promptInput.value.length;
+            charCountSpan.textContent = `${charCount} / 160`;
+            if (charCount > 160) {
+                charCountSpan.classList.add('text-red-500');
+            } else {
+                charCountSpan.classList.remove('text-red-500');
+            }
+        });
+        
         // --- Core Functions ---
         function updateActiveRatioUI() {
-            document.querySelectorAll('.ratio-btn').forEach(b => b.classList.toggle('active-btn', b.dataset.ratio === appState.selectedRatio));
+            document.querySelectorAll('.ratio-btn').forEach(b => {
+                b.classList.toggle('active-btn', b.dataset.ratio === appState.selectedRatio);
+            });
         }
         
         function updateActiveVibeUI() {
             document.querySelectorAll('.vibe-btn').forEach(b => b.classList.toggle('active-btn', b.dataset.vibe === appState.selectedVibe));
         }
 
+        function updateActiveMoodUI() {
+            document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('active-btn', b.dataset.mood === appState.selectedMood));
+        }
+        
+        function updateDesignModeUI() {
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active-btn', b.dataset.mode === appState.mode));
+            defaultControls.classList.toggle('hidden', appState.mode !== 'default');
+            twitterControls.classList.toggle('hidden', appState.mode !== 'twitter');
+            aiControls.classList.toggle('hidden', appState.mode !== 'ai');
+            defaultAndTwitterControls.classList.toggle('hidden', appState.mode === 'ai');
+
+            // Set the appropriate vibe container to be active based on mode
+            if (appState.mode === 'twitter') {
+                updateActiveVibeUI();
+            } else if (appState.mode === 'default') {
+                updateActiveVibeUI();
+            } else {
+                // If in AI mode, ensure vibe buttons are not selected
+                document.querySelectorAll('.vibe-btn').forEach(b => b.classList.remove('active-btn'));
+            }
+        }
+
+        async function generateAIQuote() {
+            const userPrompt = aiPromptInput.value.trim();
+            if (!userPrompt) {
+                return;
+            }
+
+            // Set a loading state
+            generateBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating...`;
+            generateBtn.disabled = true;
+
+            const mood = appState.selectedMood;
+            const prompt = `Based on the following thoughts and a chosen mood, create a short, human, and easy-to-understand quote. Also, provide a short, creative summary or title for this quote. The tone should match the mood.
+
+            Thoughts: "${userPrompt}"
+            Mood: "${mood}"
+
+            Provide the response in the following JSON format:
+            {
+              "quote": "The generated quote.",
+              "summary": "A creative summary of the quote."
+            }`;
+            
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            "quote": { "type": "STRING" },
+                            "summary": { "type": "STRING" }
+                        },
+                        "propertyOrdering": ["quote", "summary"]
+                    }
+                }
+            };
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=`;
+            const maxRetries = 5;
+            let attempt = 0;
+            let response;
+            let result;
+
+            while (attempt < maxRetries) {
+                try {
+                    response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.status === 429) {
+                        const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(res => setTimeout(res, delay));
+                        attempt++;
+                        continue;
+                    }
+
+                    result = await response.json();
+                    break;
+                } catch (error) {
+                    console.error('Fetch error:', error);
+                    break;
+                }
+            }
+            
+            generateBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0a1 1 0 0 1 1 1v5.268l4.562-2.634a1 1 0 1 1 1 1.732L10 8l4.562 2.634a1 1 0 1 1-1 1.732L9 9.732V15a1 1 0 1 1-2 0V9.732l-4.562 2.634a1 1 0 1 1-1-1.732L6 8 1.438 5.366a1 1 0 0 1 1-1.732L7 6.268V1a1 1 0 0 1 1-1z"/></svg> Generate`;
+            generateBtn.disabled = false;
+
+            if (result && result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
+                try {
+                    const jsonString = result.candidates[0].content.parts[0].text;
+                    const parsedJson = JSON.parse(jsonString);
+                    promptInput.value = `“${parsedJson.quote}”`;
+                    headerInput.value = parsedJson.summary.toUpperCase();
+                    footerInput.value = `@quoteit`;
+                    randomizeBtn.classList.remove('hidden');
+                    renderAllCanvases();
+                } catch (e) {
+                    console.error('Failed to parse JSON response from API:', e);
+                    promptInput.value = "Sorry, I couldn't generate a quote for you. Please try again.";
+                    renderAllCanvases();
+                }
+            } else {
+                console.error("API response was empty or in an unexpected format.");
+                promptInput.value = "Sorry, I couldn't generate a quote for you. Please try again.";
+                renderAllCanvases();
+            }
+        }
+
+
         function renderAllCanvases() {
             resultsGrid.innerHTML = '';
-            const usedFonts = new Set();
-            const usedBgs = new Set();
             const dims = aspectRatios[appState.selectedRatio];
-            const currentVibe = VIBES[appState.selectedVibe];
+            const isTwitterMode = appState.mode === 'twitter';
+            const bgDataURL = isTwitterMode ? appState.twitterBgDataURL : appState.defaultBgDataURL;
+            const vibeBackgrounds = isTwitterMode ? VIBES[appState.selectedVibe]?.backgrounds : VIBES[appState.selectedVibe]?.backgrounds;
 
             for (let i = 0; i < 6; i++) {
-                let font = getRandomItem(currentVibe.fonts, usedFonts);
-                usedFonts.add(font);
-
-                let bg = appState.customBgDataURL ? appState.customBgDataURL : getRandomItem(currentVibe.backgrounds, usedBgs);
-                if (!appState.customBgDataURL) usedBgs.add(bg);
-
                 const card = document.createElement('div');
                 card.className = 'result-card';
                 card.style.aspectRatio = `${dims.width} / ${dims.height}`;
@@ -295,15 +596,30 @@
                 card.appendChild(overlay);
 
                 resultsGrid.appendChild(card);
-                drawCanvas(canvas, {
-                    main: promptInput.value,
-                    header: headerInput.value || 'INSPIRATION',
-                    footer: footerInput.value || '@yourhandle'
-                }, font, bg, dims);
+
+                const backgroundStyle = (bgDataURL && !appState.selectedVibe) ? bgDataURL : (vibeBackgrounds ? getRandomItem(vibeBackgrounds) : null);
+                
+                if (isTwitterMode) {
+                    drawTwitterCanvas(canvas, {
+                        main: promptInput.value,
+                        header: headerInput.value || 'Quote It.',
+                        footer: footerInput.value || '@yourhandle'
+                    }, backgroundStyle, appState.customProfileDataURL);
+                } else {
+                    const usedFonts = new Set();
+                    const currentVibe = VIBES[appState.selectedVibe];
+                    let font = getRandomItem(currentVibe.fonts, usedFonts);
+                    usedFonts.add(font);
+                    drawDefaultCanvas(canvas, {
+                        main: promptInput.value,
+                        header: headerInput.value || 'INSPIRATION',
+                        footer: footerInput.value || '@yourhandle'
+                    }, font, backgroundStyle, dims);
+                }
             }
         }
 
-        async function drawCanvas(canvas, text, fontFamily, backgroundStyle, dims) {
+        async function drawDefaultCanvas(canvas, text, fontFamily, backgroundStyle, dims) {
             const ctx = canvas.getContext('2d');
             canvas.width = dims.width;
             canvas.height = dims.height;
@@ -347,15 +663,128 @@
             ctx.fillText(text.footer.toUpperCase(), canvas.width / 2, canvas.height - padding);
         }
 
+        async function drawTwitterCanvas(canvas, text, backgroundDataUrl, profileDataUrl) {
+            const ctx = canvas.getContext('2d');
+            const dims = aspectRatios[appState.selectedRatio];
+            canvas.width = dims.width;
+            canvas.height = dims.height;
+            ctx.imageSmoothingQuality = 'high';
+            
+            // Draw the background
+            const defaultBgUrl = 'https://placehold.co/1080x1920/D6E8F6/B4D4F3?text=Cloudy+Sky';
+            const bgUrl = backgroundDataUrl || defaultBgUrl;
+            await drawBackground(ctx, canvas, bgUrl);
+
+            // Dynamically calculate card size and position
+            const cardWidth = canvas.width * 0.8;
+            const profilePadding = cardWidth * 0.05;
+            const profileAvatarSize = cardWidth * 0.08;
+            const nameFontSize = cardWidth * 0.04;
+            const handleFontSize = cardWidth * 0.03;
+            const quoteFontSize = cardWidth * 0.05;
+
+            // Get text metrics to calculate card height
+            ctx.font = `${quoteFontSize}px 'Inter', sans-serif`;
+            const lines = wrapText(text.main, cardWidth - profilePadding * 2, ctx);
+            const lineHeight = quoteFontSize * 1.4;
+            const textHeight = lines.length * lineHeight;
+            
+            // Calculate dynamic card height to fit content
+            const cardHeight = (profileAvatarSize + profilePadding * 2) + textHeight + (profilePadding * 2);
+            const cardX = (canvas.width - cardWidth) / 2;
+            const cardY = (canvas.height - cardHeight) / 2;
+            const cardRadius = 24;
+            
+            ctx.fillStyle = '#FFFFFF';
+            drawRoundedRect(ctx, cardX, cardY, cardWidth, cardHeight, cardRadius);
+
+            // Draw the avatar
+            const avatarUrl = profileDataUrl || 'https://placehold.co/100x100/A5B4FC/4338CA?text=AV';
+            const avatarImg = new Image();
+            avatarImg.src = avatarUrl;
+            await new Promise(resolve => avatarImg.onload = resolve);
+            
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(cardX + profilePadding + profileAvatarSize / 2, cardY + profilePadding + profileAvatarSize / 2, profileAvatarSize / 2, 0, Math.PI * 2, true);
+            ctx.closePath();
+            ctx.clip();
+            ctx.drawImage(avatarImg, cardX + profilePadding, cardY + profilePadding, profileAvatarSize, profileAvatarSize);
+            ctx.restore();
+
+            // Draw the user name (header)
+            ctx.fillStyle = '#000000';
+            ctx.textAlign = 'left';
+            ctx.font = `bold ${nameFontSize}px 'Inter', sans-serif`;
+            const profileTextY = cardY + profilePadding + profileAvatarSize / 2;
+            ctx.fillText(text.header, cardX + profilePadding + profileAvatarSize + profilePadding, profileTextY);
+
+            // Draw the handle (footer)
+            ctx.font = `${handleFontSize}px 'Inter', sans-serif`;
+            ctx.fillStyle = '#657786';
+            ctx.fillText(text.footer, cardX + profilePadding + profileAvatarSize + profilePadding, profileTextY + nameFontSize * 1.2);
+
+            // Draw the quote text
+            const quoteTextX = cardX + profilePadding;
+            const quoteTextMaxWidth = cardWidth - profilePadding * 2;
+            const quoteTextY = cardY + profilePadding + profileAvatarSize + profilePadding * 2;
+            
+            ctx.fillStyle = '#000000';
+            ctx.textAlign = 'left';
+            ctx.font = `${quoteFontSize}px 'Inter', sans-serif`;
+            
+            let currentY = quoteTextY;
+
+            lines.forEach(line => {
+                ctx.fillText(line, quoteTextX, currentY);
+                currentY += lineHeight;
+            });
+        }
+
+        // Helper function to draw a rounded rectangle
+        function drawRoundedRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+            ctx.fill();
+        }
+
         async function drawBackground(ctx, canvas, style) {
-            if (style.startsWith('data:image')) {
+            if (style && (style.startsWith('data:image') || style.startsWith('http'))) {
                 return new Promise(resolve => {
                     const img = new Image();
                     img.onload = () => {
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        const imgRatio = img.width / img.height;
+                        const canvasRatio = canvas.width / canvas.height;
+                        let drawWidth, drawHeight, drawX, drawY;
+
+                        if (imgRatio > canvasRatio) {
+                            // Image is wider than canvas, so crop sides
+                            drawHeight = canvas.height;
+                            drawWidth = imgRatio * drawHeight;
+                            drawX = (canvas.width - drawWidth) / 2;
+                            drawY = 0;
+                        } else {
+                            // Image is taller than canvas, so crop top/bottom
+                            drawWidth = canvas.width;
+                            drawHeight = drawWidth / imgRatio;
+                            drawX = 0;
+                            drawY = (canvas.height - drawHeight) / 2;
+                        }
+
+                        ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
                         resolve();
                     };
                     img.onerror = () => {
+                        console.error('Failed to load image, using default color.');
                         ctx.fillStyle = '#0C1A1E';
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                         resolve();
@@ -363,7 +792,7 @@
                     img.src = style;
                 });
             } else {
-                if (style.startsWith('linear-gradient')) {
+                if (style && style.startsWith('linear-gradient')) {
                     const colors = style.match(/#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})/g);
                     const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
                     if (colors.length > 2) {
